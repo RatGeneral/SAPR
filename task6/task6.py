@@ -1,10 +1,7 @@
 import numpy as np
 
-CSV_PATH = "./task6_data.csv"
-
-
-def readCSV():
-    with open(CSV_PATH) as file:
+def readCSV(csv_file):
+    with open(csv_file) as file:
         pre_result = []
         result = []
         my_row = []
@@ -19,63 +16,90 @@ def readCSV():
             my_row = []
     return result
 
-
-def build_matrix(matrix):
+def makeMyMatrix(matrix):
     arr_matrix = []
     new_row = []
     for k in range(0, len(matrix)):
         for i in range(0, len(matrix[k])):
             for j in range(0, len(matrix[k])):
-                if matrix[k][i] < matrix[k][j]:
+                if (matrix[k][i] < matrix[k][j]):
                     new_row.append(1)
-                elif matrix[k][i] == matrix[k][j]:
+                elif (matrix[k][i] == matrix[k][j]):
                     new_row.append(0.5)
-                elif matrix[k][i] > matrix[k][j]:
+                elif (matrix[k][i] > matrix[k][j]):
                     new_row.append(0)
         arr_matrix.append(new_row)
         new_row = []
     return arr_matrix
 
-
-def build_matrix_1(matrixs):
+def makeOneMatrix(matrixs):
     oneMatrix = []
     for i in range(0, len(matrixs[0])):
         summa = 0
         for k in range(0, len(matrixs)):
             summa += matrixs[k][i]
-        oneMatrix.append(summa / len(matrixs))
+        oneMatrix.append(summa/len(matrixs))
     return oneMatrix
 
+# Лекция очно
+# def makeKMatrixAgain(oneMatrix, k = [1/3, 1/3, 1/3]):
+#     xMatrix = []
+#     kLambda = 0
+#     matSumma = 0
+#     sumMatrix = [0] * len(k)
+#     kMatrix = []
+#     for i in range(0, len(oneMatrix), len(k)):
+#         matSumma = 0
+#         for j in range(0, len(k)):
+#             matSumma += oneMatrix[i+j]*k[j]
+#         xMatrix.append(matSumma)
+
+#     for i in range(0, len(oneMatrix)):
+#         kLambda += oneMatrix[i] * xMatrix[i // len(k)]
+        
+#     tmpMatrix = []
+#     for i in range(0, len(oneMatrix)):
+#         tmpMatrix.append(oneMatrix[i] * xMatrix[i // len(k)])
+#     for i in range(0, len(tmpMatrix)):
+#         sumMatrix[i % len(k)] += tmpMatrix[i]
+#     for i in range(0, len(sumMatrix)-1):
+#         kMatrix.append(round((1/kLambda)*sumMatrix[i], 3))
+#     kSumma = 0
+#     for i in range(0, len(kMatrix)):
+#         kSumma += kMatrix[i]
+#     kMatrix.append(round(1-kSumma, 3))
+#     if (abs(kMatrix[len(kMatrix)-1] - k[len(k)-1]) > 0.001):
+#         return makeKMatrixAgain(oneMatrix, kMatrix)
+#     else:
+#         return kMatrix
 
 def split(a, n):
     k, m = divmod(len(a), n)
-    return (a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 
-def build_matrix_k(oneMatrix, k=[1 / 3, 1 / 3, 1 / 3]):
+def makeKMatrix(oneMatrix, k = [1/3, 1/3, 1/3]):
     kMatrix = list(split(oneMatrix, len(k)))
     n = len(kMatrix[0])
-    k_p = np.ones(n) / n
-
+    kP = np.ones(n) / n
+    kN = None
     while True:
-        y = np.matmul(kMatrix, k_p)
+        y = np.matmul(kMatrix, kP)
         lbd = np.matmul(np.ones(n), y)
         kN = (1 / lbd) * y
-        diff = abs(kN - k_p)
+        diff = abs(kN - kP)
         max = diff.max()
         if max <= 0.001:
             break
         else:
-            k_p = kN
+            kP = kN
     return np.around(kN, 3)
 
-
-def task():
-    res1 = readCSV()
-    res2 = build_matrix(res1)
-    res3 = build_matrix_1(res2)
-    res4 = build_matrix_k(res3)
+def task(csvString):
+    res1 = readCSV(csvString)
+    res2 = makeMyMatrix(res1)
+    res3 = makeOneMatrix(res2)
+    res4 = makeKMatrix(res3)
     return res4
-
-
-print(task())
+    
+print(task("./task6_data.csv"))
